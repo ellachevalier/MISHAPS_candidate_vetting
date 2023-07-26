@@ -214,7 +214,7 @@ def compare_odd_and_even(data_new, t0s, p0_guess, best_period, ecc, w, rldc_r, r
         
         param_even, cov_err_even, err_tot_adj_even, results_batman_even = run_batman(p0_guess, best_period, ecc, w, rldc_r, rldc_z, data_even_r_cut, data_even_z_cut, data_even_r, data_even_z, title='Transit Model for Even Data', t0_1=t0_1)
 
-        lower_bounds = [param_even[0]-0.1, 0.0, 0.0, 0.0, 70.0, 0., 0.]
+        lower_bounds = [param_even[0]-0.1, 0.0, 0.0, 0.0, 50.0, 0., 0.]
         upper_bounds = [param_even[0]+0.1, 10.0, 10.0, 40.0, 130.0, 40., 40.]
 
         time_tot = np.append(np.array(data_even_r_cut['time_r']), np.array(data_even_z_cut['time_z'])+100000)
@@ -267,7 +267,7 @@ def compare_odd_and_even(data_new, t0s, p0_guess, best_period, ecc, w, rldc_r, r
         
         param_odd, cov_err_odd, err_tot_adj_odd, results_batman_odd = run_batman(p0_guess, best_period, ecc, w, rldc_r, rldc_z, data_odd_r_cut, data_odd_z_cut, data_odd_r, data_odd_z, title='Transit Model for Odd Data' , t0_1=t0_1)
 
-        lower_bounds = [param_odd[0]-0.1, 0.0, 0.0, 0.0, 70.0, 0., 0.]
+        lower_bounds = [param_odd[0]-0.1, 0.0, 0.0, 0.0, 50.0, 0., 0.]
         upper_bounds = [param_odd[0]+0.1, 10.0, 10.0, 40.0, 130.0, 40., 40.]
         
         time_tot = np.append(np.array(data_odd_r_cut['time_r']), np.array(data_odd_z_cut['time_z'])+100000)

@@ -167,20 +167,27 @@ def run_batman(p0_guess, period, ecc, w, rldc_r, rldc_z, data_cut_r, data_cut_z,
     data_r_folded_cut, data_z_folded_cut, ans_r_folded, ans_z_folded, initial_guess_r_folded, initial_guess_z_folded = folded_lightcurve(data_cut_r, data_cut_z, period, t0_1, show_plot=False, ans_r=ans_r, ans_z=ans_z, initial_guess_r=initial_guess_r, initial_guess_z=initial_guess_z)
     data_r_folded, data_z_folded = folded_lightcurve(data_r, data_z, period, t0_1, show_plot=False) #ans_r=ans_r, ans_z=ans_z, initial_guess_r=initial_guess_r, initial_guess_z=initial_guess_z)
     plt.figure()
-    plt.plot(data_r_folded['phases_r'], data_r_folded['mag_r'],'o', color='lightskyblue', label='data r', markersize=1.)
-    plt.plot(data_z_folded['phases_z'], data_z_folded['mag_z'],'o', color='pink', label='data z', markersize=1.)
-    plt.plot(data_r_folded_cut['phases_r'], initial_guess_r_folded, '--', color='blue', label='initial guess r')
-    plt.plot(data_z_folded_cut['phases_z'], initial_guess_z_folded, '--', color='red', label='initial guess z')
-    plt.gca().invert_yaxis()
-    plt.plot(data_r_folded_cut['phases_r'], ans_r_folded, color='blue', label='optimized fit r') #deepskyblue
-    plt.plot(data_z_folded_cut['phases_z'], ans_z_folded, color='red', label='optimized fit z') #blueviolet
-       # plt.xlim(0,1)
-    plt.legend()
+    #plt.plot(data_r_folded['phases_r'], data_r_folded['mag_r'],'o', color='lightskyblue', markersize=1.0) #, label='data r', markersize=1.)
+    #plt.plot(data_z_folded['phases_z'], data_z_folded['mag_z'],'o', color='pink', markersize=1.0) # , label='data z', markersize=1.)
+    plt.plot(data_r_folded['phases_r'], data_r_folded['mag_r'],'o', color='blue', alpha=0.25, markersize=1.0) #, label='data r', markersize=1.)
+    plt.plot(data_z_folded['phases_z'], data_z_folded['mag_z'],'o', color='red', alpha=0.25, markersize=1.0) #  
+    #plt.plot(data_r_folded_cut['phases_r'], initial_guess_r_folded, '--', color='blue', label='initial guess r')
+    #plt.plot(data_z_folded_cut['phases_z'], initial_guess_z_folded, '--', color='red', label='initial guess z')
+
+    plt.plot(data_r_folded_cut['phases_r'], ans_r_folded, color='blue') #, label='optimized fit r') #deepskyblue
+    plt.plot(data_z_folded_cut['phases_z'], ans_z_folded, color='red') #, label='optimized fit z') #blueviolet
+    #plt.xlim(0.08,0.42)
+    #plt.ylim(16.91, 16.99)
+    labels=['r-band', 'z-band']
+    plt.legend(labels=labels, loc='upper right')
         #plt.ylim(C_z+0.05, C_r-0.05)
     plt.title(title+' for P='+str(round(period,4)))
+    #plt.title('Transit Model for Candidate 1')
     plt.xlabel('Phase')
     plt.ylabel('Magnitude')
-        #plt.xlim(0,1)
+    #plt.xlim(0,1)   
+    plt.gca().invert_yaxis()
+    #plt.savefig(os.path.join('poster_images', title+str(period)+'.png'), dpi=300)
     plt.savefig(os.path.join('figs', title+'.png'))
 
     
