@@ -96,7 +96,7 @@ def folded_all_data(data_new, t0s, p0_guess, best_period, ecc, w, rldc_r, rldc_z
     
     labels = ["t0", "rp_r", "rp_z", "a", "inc", "C_r", "C_z"]
 
-    lower_bounds = [param_all[0]-0.1, 0.0, 0.0, 0.0, 70.0, 0., 0.]
+    lower_bounds = [param_all[0]-0.1, 0.0, 0.0, 0.0, 50.0, 0., 0.]
     upper_bounds = [param_all[0]+0.1, 10.0, 10.0, 40.0, 130.0, 40., 40.]
         
     if all_guesses is None:

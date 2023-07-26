@@ -191,6 +191,9 @@ def find_period(transit_data, data, avg_first_and_last, t, t_err, transit_nights
             t0_new_err=cov_err[0]
             period_new=param[1]
             period_new_err=cov_err[1]
+            
+#             if period_new==period:
+#                 print('fit returned same period')
 
             params1 = batman.TransitParams()
             params1.t0 = t0_new
@@ -393,7 +396,7 @@ def find_period(transit_data, data, avg_first_and_last, t, t_err, transit_nights
     #if len(final_periods)==1:
         #final_periods.extend(final_periods_old[:2])
     
-    plt.figure()
+    plt.figure(figsize=(6.4,5.2)) #6.4 and 4.8 
     x2s=df['x2']-(df['x2'].min()-1)
     x2_transits=final_df['x2_transit']-(final_df['x2_transit'].min()-1)
     plt.plot(df['Period'], x2s, 'o', markersize=2.0, label='after transit time search')
@@ -407,6 +410,7 @@ def find_period(transit_data, data, avg_first_and_last, t, t_err, transit_nights
     plt.legend()
     plt.xscale('log')
     plt.yscale('log')
+    #plt.savefig(os.path.join('poster_images','log_x2s_vs_log_periods_with_final_periods.png'), dpi=300)
     plt.savefig(os.path.join('period_fit_results','log_x2s_vs_log_periods_with_final_periods.pdf'))
     
     plt.figure()
@@ -416,6 +420,8 @@ def find_period(transit_data, data, avg_first_and_last, t, t_err, transit_nights
     lines=np.ones(len(final_df['Period']))*line_change
     plt.plot(final_df['Period'],lines,label='$\chi^2$ for straight line')
     plt.title('$\Delta\chi^2$ vs. Period With Straight Line Comparison')
+    plt.xscale('log')
+    plt.yscale('log')
     plt.xlabel('Period')
     plt.ylabel('$\Delta\chi^2$')
     plt.legend()

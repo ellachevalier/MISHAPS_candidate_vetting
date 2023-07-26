@@ -14,7 +14,7 @@ from remove_variability_attempt import remove_variability_all
 from limb_darkening_calculation import ld_calc
 from density_calculation import density_calculation
 from total_plot import make_total_plot
-from fit_secondary_eclipse import fit_secondary_eclipse
+from fit_secondary_eclipse_attempt2 import fit_secondary_eclipse
 
 
 # %%
@@ -46,6 +46,9 @@ parser.add_argument("--cutoff", metavar='cutoff', type=int, help='number of peri
 parser.add_argument("--final_cutoff", metavar='final_cutoff', type=int, help='interval of x2 to include abov the lowest x2 period', default=10)
 parser.add_argument("--add_period", metavar='add_period', nargs='+', type=float, help='list periods to add to analysis', default=None)
 parser.add_argument("--fp_guess", nargs='+', metavar='fp_guess', type=float, help='initial guess for planet-to-star flux ratios [fp_guess_r, fp_guess_z]', default=[0.001, 0.001])
+parser.add_argument("--period_fit_parameters", nargs='+', metavar='period_fit_parameters', type=float, help='transit parameters for model used in period fit, [rp_r, rp_z, a, inc, C_r, C_z]', default=None)
+parser.add_argument("--C_guess_sec", nargs='+', metavar='C_guess_sec', type=float, help='initial guess for baseline C for secondary eclipse fit [C_guess_r, C_guess_z]', default=None)
+parser.add_argument("--ignore_nontransit", nargs='+', metavar='ignore_nontransit', type=bool, help='True: folded lightcurves use only transit night data. False: folded lightcurves use all data.', default=False)
 args=parser.parse_args()
 
 
@@ -74,6 +77,9 @@ cutoff=args.cutoff
 final_cutoff=args.final_cutoff
 add_period=args.add_period
 fp_guess=args.fp_guess
+period_fit_parameters=args.period_fit_parameters
+C_guess_sec=args.C_guess_sec
+ignore_nontransit=args.ignore_nontransit
 
 # %%
 filename_r = os.path.join('data','MISHAPS_'+str(field)+"_"+str(chip)+"_"+str(star_id)+".r.lc.dtr")
@@ -120,6 +126,7 @@ else:
     first=[p0_guess_new[0]]
     first.extend(initial_guess_test)
     p0_guess = first
+print(p0_guess)
 
 #remove outliers
 sigmas=star_data['best_std_outoftransit[n]'].tolist()
@@ -130,7 +137,18 @@ results_batman, results_mcmc, results_mcmc_per, t0_mcmc, t0_err_mcmc, avg_first_
 
 #find best period estimate
 #data_period_fit = get_split_data(filename_r, filename_z, all_nights)
-initial_best_periods, best_periods, final_periods=find_period(transit_data, data_new, avg_first_and_last, t0_mcmc, t0_err_mcmc, transit_nights, all_nights, period, [rldc_r, rldc_z], cutoff=cutoff, final_cutoff=final_cutoff)
+if period_fit_parameters is None:
+    period_fit_parameters_final=avg_first_and_last
+else:
+    period_fit_parameters_final={}
+    period_fit_parameters_final['rp_r']=period_fit_parameters[0]
+    period_fit_parameters_final['rp_z']=period_fit_parameters[1]
+    period_fit_parameters_final['a']=period_fit_parameters[2]
+    period_fit_parameters_final['inc']=period_fit_parameters[3]
+    period_fit_parameters_final['C_r']=period_fit_parameters[4]
+    period_fit_parameters_final['C_z']=period_fit_parameters[5]
+    
+initial_best_periods, best_periods, final_periods=find_period(transit_data, data_new, period_fit_parameters_final, t0_mcmc, t0_err_mcmc, transit_nights, all_nights, period, [rldc_r, rldc_z], cutoff=cutoff, final_cutoff=final_cutoff)
 make_chi2_csv(initial_best_periods, best_periods, field, chip, star_id)
 
 if add_period is not None:
@@ -144,10 +162,16 @@ contents=[]
 densities_r={}
 densities_z={}
 chains={}
+
+if ignore_nontransit==True:
+    final_data=data_new_transit
+else:
+    final_data=data_new
+final_periods=final_periods[:1]
 for best_period in final_periods:
-    results_batman_even, results_batman_odd, results_mcmc_even, results_mcmc_odd, results_mcmc_per_even, results_mcmc_per_odd, even_guesses, odd_guesses, mcmc_chains_even, mcmc_chains_odd = compare_odd_and_even(data_new, t0_mcmc, p0_guess, best_period, ecc, w, rldc_r, rldc_z, all_nights, show_plot=True, nwalkers=nwalkers, nsteps=nsteps, even_guesses=even_guesses, odd_guesses=odd_guesses, mcmc_sigmas=mcmc_sigmas)
+    results_batman_even, results_batman_odd, results_mcmc_even, results_mcmc_odd, results_mcmc_per_even, results_mcmc_per_odd, even_guesses, odd_guesses, mcmc_chains_even, mcmc_chains_odd = compare_odd_and_even(final_data, t0_mcmc, p0_guess, best_period, ecc, w, rldc_r, rldc_z, all_nights, show_plot=True, nwalkers=nwalkers, nsteps=nsteps, even_guesses=even_guesses, odd_guesses=odd_guesses, mcmc_sigmas=mcmc_sigmas)
     
-    results_batman_all, results_mcmc_all, results_mcmc_per_all, all_guesses, mcmc_chains_all = folded_all_data(data_new, t0_mcmc, p0_guess, best_period, ecc, w, rldc_r, rldc_z, show_plot=True, nwalkers=nwalkers, nsteps=nsteps, mcmc_sigmas=mcmc_sigmas, all_guesses=all_guesses)
+    results_batman_all, results_mcmc_all, results_mcmc_per_all, all_guesses, mcmc_chains_all = folded_all_data(final_data, t0_mcmc, p0_guess, best_period, ecc, w, rldc_r, rldc_z, show_plot=True, nwalkers=nwalkers, nsteps=nsteps, mcmc_sigmas=mcmc_sigmas, all_guesses=all_guesses)
     
     comparison_plot(results_mcmc_per_even, results_mcmc_per_odd, results_mcmc_per_all, results_batman_even, results_batman_odd, results_batman_all, period=best_period)
     
@@ -168,7 +192,10 @@ for best_period in final_periods:
     chains[best_period]=[mcmc_chains_all, mcmc_chains_even, mcmc_chains_odd]
     
     #fit secondary eclipse
-    p0_sec=[fp_guess[0], fp_guess[1], results_mcmc_per_all['50th'][5], results_mcmc_per_all['50th'][6]]
+    if C_guess_sec is None:
+        p0_sec=[fp_guess[0], fp_guess[1], results_mcmc_per_all['50th'][5], results_mcmc_per_all['50th'][6]]
+    else:
+        p0_sec=[fp_guess[0], fp_guess[1], C_guess_sec[0], C_guess_sec[1]]
     #p0_sec=[0.001, 0.001, 16.94, 16.94]
     rldc=[rldc_r, rldc_z]
     param_sec, param_sec_cov = fit_secondary_eclipse(data_new, results_mcmc_per_all, t0_mcmc, p0_sec, period, rldc)
@@ -180,8 +207,14 @@ make_final_pdf(contents, field, chip, star_id, p0_guess, even_guesses, odd_guess
 
 # %%
 #Can copy and paste into command line to run function
-#python final_script.py 'F1' 'N2' '01020506' 0.9752 --exclude 2 36 48 738 770 --include_transit 33 35 --Teff 4503 --logg 4.739 --add_period 0.9751834577 
+#python final_script.py 'F1' 'N2' '01020506' 0.9752 --exclude 2 36 48 738 770 --include_transit 33 35 --Teff 4503 --logg 4.739 --add_period 0.9751834577 --initial_guesses 0.12 0.12 9.0 89.0 18.444946 18.0233109
 #python final_script.py 'F1' 'N2' '01031115' 1.9413 --Teff 5540 --logg 4.499 --exclude 2 36 48 738 770
-#python final_script.py 'F1' 'N19' '01045451' 0.4913 --exclude 2 36 48 738 770 --exclude_transit 740 --include_transit 33 --Teff 5607 --logg 4.481 --nsteps 20000 --even_guesses 0.59078904 0.46177587 0.47236939 2.20804344 55.45659689 17.99321475 17.923996
-#python final_script.py 'F1' 'N19' '01027538' 1.9888 --exclude 2 36 48 738 770 --Teff 4398 --logg 4.629 --remove_variability True
+#python final_script.py 'F1' 'N19' '01045451' 0.4913 --exclude 2 36 48 738 770 --exclude_transit 740 --include_transit 33 --Teff 5607 --logg 4.481 --nsteps 20000 --remove_variability True --initial_guesses 0.14581235179821908 0.14581235179821908 3.5063794852166175 89.0 17.99 17.99
+#python final_script.py 'F1' 'N19' '01027538' 1.9888 --exclude 2 36 48 738 770 --Teff 4398 --logg 4.629 --remove_variability True --nsteps 20000
 #python final_script.py 'F1' 'N6' '01050399' 1.0087 --exclude 2 36 48 738 744 770 --nsteps 20000 --remove_variability True --Teff 5895 --logg 4.621 --exclude_transit 768
+
+
+#works but folded lightcurves don't look good so not good results
+#python final_script.py 'F1' 'N13' '01041179' 1.3513 --exclude 2 36 48 738 770 --include_transit 0 --Teff 5508 --logg 4.411 --remove_variability True
+
+#python final_script.py 'F1' 'N18' '01061878' 2.8073 --exclude 2 36 48 738 770 --include_transit 742 --Teff 4196 --logg 4.719 --remove_variability True --period_fit_parameters 0.1 0.1 8.8 90.7 18.25267 18.25121

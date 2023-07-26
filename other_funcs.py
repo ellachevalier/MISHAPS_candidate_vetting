@@ -125,6 +125,10 @@ def make_final_pdf(contents, field, chip, star_id, p0_guess, even_guesses, odd_g
     for file in period_pdfs:
         pdfs.append(os.path.join('period_fit_results', file))
     pdfs.append(os.path.join('figs','secondary_eclipse_fit.pdf'))
+    fig_list=os.listdir('figs')
+    sec_pic_list = [item for item in fig_list if 'secondary' in item]
+    for file in sec_pic_list:
+        pdfs.append(os.path.join('figs', file))
     #pdfs.append(os.path.join('figs', 'secondary_eclipse_fit_all_parameters.pdf'))
     #pdfs.append('total_plot_'+str(star_id)+'.pdf')
     
@@ -479,17 +483,20 @@ def comparison_plot(results_mcmc_even, results_mcmc_odd, results_mcmc_all, resul
         ax.scatter([4, 5], y_even_batman, facecolors='none', edgecolors='dimgrey', zorder=2)
         ax.scatter([4.1, 5.1], y_odd_batman, facecolors='none', edgecolors='dimgrey', zorder=2)
     
-    ax.set_ylabel('Planet radii (r_p/r_star)')
+    ax.set_ylabel('Planet radii (rp/r$_\star$)')
     if period==None:
         ax.set_title('Comparison of planet radii for folded lightcurves')
     else: 
         ax.set_title('Comparison of planet radii for P='+str(round(period,5)))
+        #ax.set_title('Comparison of Planet Radii for Candidate 2')
+
     #ax.set_ylim(0)
     ax.set_xticks([1, 2, 3, 4, 5])
     ax.set_xticklabels(['all transits: r- and z- \ncomparison', '\n\neven transits: r- and z- \ncomparison','odd transits: r- and z- \ncomparison', '\n\nr-band: odd and even \ncomparision', 'z-band: odd and even \ncomparision'])
     #ax.set_xticklabels(['even','odd','total', 'r-band', 'z-band'])
     ax.legend(bbox_to_anchor=(1.05, 1.0), loc='upper left')
     #ax.set_yticks([-1,0,1])
+    #fig.savefig(os.path.join('poster_images', 'comparison_of_rp'+str(period)+'.png'),bbox_inches='tight', dpi=300)
     fig.savefig(os.path.join('figs', 'comparison_of_rp.pdf'),bbox_inches='tight')
     
 

@@ -41,7 +41,7 @@ def make_total_plot(data_split, nights, best_periods, initial_period, avg_first_
     idx=0
     for period in periods_list:
         params_r = batman.TransitParams()
-        params_r.t0 = t0_mcmc[0]#t0s_list[0]#results['50th'][0]                     #time of inferior conjunction
+        params_r.t0 = t0s_list[0]#results['50th'][0]                     #time of inferior conjunction
         params_r.per = period                 #orbital period
         params_r.rp = avg_first_and_last['rp_r']                   #planet radius (in units of stellar radii)
         params_r.a =  avg_first_and_last['a'] * (period/initial_period)                      #semi-major axis (in units of stellar radii)
@@ -70,16 +70,22 @@ def make_total_plot(data_split, nights, best_periods, initial_period, avg_first_
                         fmt='o', color='black', ms=1, label='r-band data')
             #i=3
             #for period in periods_list:
-            ax.plot(dr.iloc[:,tcol], dr.iloc[:,3], linewidth=4.0, label=str(round(periods_list[4],5)))
-            ax.plot(dr.iloc[:,tcol], dr.iloc[:,4], linewidth=4.0, label=str(round(periods_list[3],5)))
-            ax.plot(dr.iloc[:,tcol], dr.iloc[:,5], linewidth=4.0, label=str(round(periods_list[2],5)))
-            ax.plot(dr.iloc[:,tcol], dr.iloc[:,6], linewidth=4.0, label=str(round(periods_list[1],5)))
-            ax.plot(dr.iloc[:,tcol], dr.iloc[:,7], linewidth=4.0, label=str(round(periods_list[0],5)))
+            ax.plot(dr.iloc[:,tcol], dr.iloc[:,3], linewidth=4.0, label=str(round(periods_list[0],5)), zorder=5)
+            ax.plot(dr.iloc[:,tcol], dr.iloc[:,4], linewidth=4.0, label=str(round(periods_list[1],5)), zorder=4)
+            ax.plot(dr.iloc[:,tcol], dr.iloc[:,5], linewidth=4.0, label=str(round(periods_list[2],5)), zorder=3)
+            ax.plot(dr.iloc[:,tcol], dr.iloc[:,6], linewidth=4.0, label=str(round(periods_list[3],5)), zorder=2)
+            ax.plot(dr.iloc[:,tcol], dr.iloc[:,7], linewidth=4.0, label=str(round(periods_list[4],5)), zorder=1)
             #ax.plot(dr.iloc[:,tcol], dr.iloc[:,8], linewidth=4.0, label=str(round(periods_list[5],5)))
             ax.set_title('Night ' +str(night))
+            #ax.set_ylabel('Magnitude')
+            #ax.set_xlabel('Time (days)')
+            ax.set_xlim(float(night)+0.45, float(night)+1.0)
+            #ax.set_ylim(avg_first_and_last['C_r']-0.03, avg_first_and_last['rp_r']**2+0.03)
             ax.invert_yaxis()
-            ax.legend()
+            #ax.legend()
         
+    labels=[str(round(periods_list[0],5)), str(round(periods_list[1],5)), str(round(periods_list[2],5)), str(round(periods_list[3],5)), str(round(periods_list[4],5))]
+    fig.legend(labels=labels, loc='center right', fontsize=20)
     fig.suptitle('Best periods plotted with r-band data', fontsize=45.0)
     plt.savefig(os.path.join('period_fit_results','total_plot_'+str(star_id)+'.pdf'))
     plt.close()

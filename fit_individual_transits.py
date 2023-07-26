@@ -72,8 +72,8 @@ def fit_individual_transits(data_new, transit_nights, p0_guess, period, ecc, w, 
         np.random.seed(42) # set seed so results consistently converge
         labels = ["t0", "rp_r", "rp_z", "a", "inc", "C_r", "C_z"]
 
-        lower_bounds = [param[0]-0.1, 0.0, 0.0, 0.0, 70.0, 0., 0.]
-        upper_bounds = [param[0]+0.1, 10.0, 10.0, 40.0, 130.0, 40., 40.]
+        lower_bounds = [param[0]-0.5, 0.0, 0.0, 0.0, 70.0, 0., 0.]
+        upper_bounds = [param[0]+0.5, 10.0, 10.0, 40.0, 130.0, 40., 40.]
 
         results_mcmc, results_mcmc_per, mcmc_chains = mcmc_functions.mcmc_all(ndim, nwalkers, nsteps, nburn, nthin, guesses, labels, time_tot, mag_tot, err_tot_adj, lower_bounds, upper_bounds, rldc_r, rldc_z, period, ecc, w, title='Individual Transit Model for Night '+ str(transit_nights[idx]))
 
@@ -128,9 +128,11 @@ def fit_individual_transits(data_new, transit_nights, p0_guess, period, ecc, w, 
 
             ax.set_title('Night ' +str(int(time_transits_r[idx][0])))
             ax.invert_yaxis()
-            ax.legend()
-        
+            #ax.legend()
+    labels=['r-band', 'z-band']
+    fig.legend(labels=labels, loc='lower center', fontsize=20) 
     fig.suptitle('Individual transits with models', fontsize=45.0)
+    #plt.savefig(os.path.join('poster_images','individual_transits_plot.png'), dpi=300)
     plt.savefig(os.path.join('figs','individual_transits_plot.pdf'))
     plt.close()
     
