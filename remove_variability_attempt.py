@@ -128,10 +128,11 @@ def cut_lcs(filename_r, filename_z, nights):
         ax = plt.subplot(5, int(np.ceil(len(nights)/5.0)), int(n+1))
 
         ax.errorbar(dr.iloc[:,tcol], dr.iloc[:,magcol], yerr=dr.iloc[:,errcol],
-                    fmt='o', color='blue', ms=1)
+                    fmt='o', color='blue', ms=1, label='r-band data')
         ax.errorbar(dz.iloc[:,tcol], dz.iloc[:,magcol]+full_diff, yerr=dz.iloc[:,errcol],
-                      fmt='o', color='red', ms=1)
-        #ax.set_xlim(night, night+1.0)
+                      fmt='o', color='red', ms=1, label='z-band data')
+        ax.set_title('Night ' +str(night))
+        ax.set_xlim(float(night)+0.45, float(night)+1.0)
 
 #         ax.errorbar(dr.iloc[:,tcol], dr.iloc[:,magcol]-ntrend_r[:]+med_diff_r, yerr=dr.iloc[:,errcol],
 #                     fmt='o', color='tab:blue', ms=3)
@@ -141,6 +142,8 @@ def cut_lcs(filename_r, filename_z, nights):
         # ax.axhline(y=lcr.iloc[:,magcol].median())
         # ax.axhline(y=2*full_medr-nmed_r)
         ax.invert_yaxis()
+    labels=['r-band data', 'z-band data']
+    fig.legend(labels=labels, loc='center right', fontsize=20) 
     fig.suptitle('Before Variability Removal', fontsize=45.0)
     plt.savefig(os.path.join('remove_variability_results','var_before_removal_check.pdf'))
     plt.close()
@@ -178,10 +181,12 @@ def cut_lcs(filename_r, filename_z, nights):
         ax = plt.subplot(5, int(np.ceil(len(nights)/5.0)), int(n+1))
 
         ax.errorbar(dr_cut.iloc[:,tcol], dr_cut.iloc[:,magcol], yerr=dr_cut.iloc[:,errcol],
-                    fmt='o', color='blue', ms=1)
+                    fmt='o', color='blue', ms=1, label='r-band data')
         ax.errorbar(dz_cut.iloc[:,tcol], dz_cut.iloc[:,magcol]+full_diff, yerr=dz_cut.iloc[:,errcol],
-                      fmt='o', color='red', ms=1)
-        ax.set_xlim(night+0.45, night+1.0)
+                      fmt='o', color='red', ms=1, label='z-band data')
+        #ax.set_xlim(night+0.45, night+1.0)
+        ax.set_title('Night ' +str(night))
+        ax.set_xlim(float(night)+0.45, float(night)+1.0)
 
 #         ax.errorbar(dr.iloc[:,tcol], dr.iloc[:,magcol]-ntrend_r[:]+med_diff_r, yerr=dr.iloc[:,errcol],
 #                     fmt='o', color='tab:blue', ms=3)
@@ -191,6 +196,8 @@ def cut_lcs(filename_r, filename_z, nights):
         # ax.axhline(y=lcr.iloc[:,magcol].median())
         # ax.axhline(y=2*full_medr-nmed_r)
         ax.invert_yaxis()
+    labels=['r-band data', 'z-band data']
+    fig.legend(labels=labels, loc='center right', fontsize=20) 
     fig.suptitle('Lightcurves With Transits Cut Out', fontsize=45.0)
     plt.savefig(os.path.join('remove_variability_results','var_cut_lc_check.pdf'))
     plt.close()
@@ -291,22 +298,26 @@ def remove_variability(nights, t_nights, filename_r, filename_z):
 
         ax = plt.subplot(5, int(np.ceil(len(nights)/5.0)), int(n+1))
 
-        ax.errorbar(dr.iloc[:,tcol], dr.iloc[:,magcol], yerr=dr.iloc[:,errcol],
-                    fmt='o', color='wheat', ms=3)
-        ax.errorbar(dz.iloc[:,tcol], dz.iloc[:,magcol]+full_diff, yerr=dz.iloc[:,errcol],
-                      fmt='o', color='pink', ms=3)
+#         ax.errorbar(dr.iloc[:,tcol], dr.iloc[:,magcol], yerr=dr.iloc[:,errcol],
+#                     fmt='o', color='wheat', ms=3, label='r-band before removal')
+#         ax.errorbar(dz.iloc[:,tcol], dz.iloc[:,magcol]+full_diff, yerr=dz.iloc[:,errcol],
+#                       fmt='o', color='pink', ms=3, label='z-band before removal')
 
         ax.errorbar(dr.iloc[:,tcol], dr.iloc[:,magcol]-ntrend_r[:]+med_diff_r, yerr=dr.iloc[:,errcol],
-                    fmt='o', color='blue', ms=3)
+                    fmt='o', color='blue', ms=4.0, label='r-band data')
         ax.errorbar(dz.iloc[:,tcol], dz.iloc[:,magcol]-ntrend_z[:]+full_diff+med_diff_z, yerr=dz.iloc[:,errcol],
-                    fmt='o', color='red', ms=3)
+                    fmt='o', color='red', ms=4.0, label='z-band data')
         # ax.plot(dr.iloc[:,tcol], ntrend_r+nmed_r)
         # ax.axhline(y=lcr.iloc[:,magcol].median())
         # ax.axhline(y=2*full_medr-nmed_r)
+        ax.set_title('Night ' +str(night))
+        ax.set_xlim(float(night)+0.45, float(night)+1.0)
         ax.invert_yaxis()
 
         corrected_r.append((dr.iloc[:,magcol]-ntrend_r[:]+med_diff_r).to_numpy())
         corrected_z.append((dz.iloc[:,magcol]-ntrend_z[:]+full_diff+med_diff_z).to_numpy())
+    labels=['r-band data', 'z-band data']
+    fig.legend(labels=labels, loc='center right', fontsize=20) 
     fig.suptitle('After Variability Removal', fontsize=45.0)
     plt.savefig(os.path.join('remove_variability_results','variability_removal_check.pdf'))
     plt.close()

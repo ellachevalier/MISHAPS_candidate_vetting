@@ -187,7 +187,7 @@ def mcmc_all(ndim, nwalkers, nsteps, nburn, nthin, guesses, labels, time, mag, e
         #corner.overplot_lines(fig, rp_r_1, color="C1")
         #corner.overplot_lines(fig, rp_z_1, color="C2")
         plt.savefig(os.path.join('figs', 'rp_comparision_plot '+str(title)+'.png'))
-        plt.savefig(os.path.join('poster_images', 'rp_comparision_plot '+str(title)+str(period)+'.png'))
+        #plt.savefig(os.path.join('poster_images', 'rp_comparision_plot '+str(title)+str(period)+'.png'))
 
     
     fig, axes = plt.subplots(ndim, figsize=(10, 7), sharex=True, rasterized=True)

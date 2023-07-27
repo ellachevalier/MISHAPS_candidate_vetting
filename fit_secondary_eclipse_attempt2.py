@@ -386,7 +386,7 @@ def fit_secondary_eclipse(data_new, results_mcmc_per_all, t0_mcmc, p0_guess, per
             ax.set_title(columns[i]+": "+r'$'+str(round(mcmc[1],4))+'_{'+str(round(q[0],4))+'}^{'+str(round(q[1],4))+'}$')
             i+=1
         #plt.show()
-        fig.savefig(os.path.join('figs', 'secondary_corner_plot '+str(title)+'.pdf'))
+        fig.savefig(os.path.join('figs', 'secondary_corner_plot.pdf'))
 
         per_mcmc_results=pd.DataFrame({'50th':per50, '16th':per16, '84th':per84, 'Median':medians})
         #plot just rp corner plot
@@ -403,7 +403,7 @@ def fit_secondary_eclipse(data_new, results_mcmc_per_all, t0_mcmc, p0_guess, per
         axes[-1].set_xlabel("step number");
         #fig.title(title+' walkers')
         fig.suptitle(title+' Walkers', fontsize=14)
-        fig.savefig(os.path.join('figs', 'secondary_walkers_plot '+str(title)+'.pdf'))
+        fig.savefig(os.path.join('figs', 'secondary_walkers_plot.pdf'))
 
         print('mcmc parameters:')
         print('fp_r: ', round(np.nanmean(mcmc_fp_rs),5), 'Err:', round(np.nanstd(mcmc_fp_rs),5))
@@ -418,12 +418,30 @@ def fit_secondary_eclipse(data_new, results_mcmc_per_all, t0_mcmc, p0_guess, per
     
     ndim=4
     nwalkers=16
-    nsteps=20000
+    nsteps=2000
     nburn=50
     nthin=125
     guesses=param
 
     mcmc_all(ndim, nwalkers, nsteps, nburn, nthin, guesses, labels, time_tot, mag_tot, err_tot, lower_bounds, upper_bounds, rldc_r, rldc_z, period, ecc, w, t0, rp_r, rp_z, a, inc, t_sec, title='mcmc model', rp_corner=False, sigmas=[10e-4, 10e-4, 10e-4, 10e-4])
-  
+    
+    fig_list=os.listdir('figs')
+    fig_list=[item for item in fig_list if ('walkers' in item or 'corner_plot' in item or 'fit' in item) and 'secondary' in item]
+    
+    pdfs = fig_list
+
+    merger = PdfMerger()
+
+    for pdf in pdfs:
+        merger.append(os.path.join('figs', pdf))
+
+    if os.path.exists('results')==False:
+        os.mkdir('results')
+    merger.write(os.path.join('results',"secondary_results"+"_period_"+str(round(period,4))+".pdf"))
+    merger.close()
+    
+    for item in fig_list:
+        os.remove(os.path.join('figs', item))
+        
     return param, param_cov #, param_all, param_cov_all
 

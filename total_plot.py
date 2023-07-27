@@ -37,6 +37,7 @@ def make_total_plot(data_split, nights, best_periods, initial_period, avg_first_
     periods=best_periods.head(5)
     periods_list = list(periods['Period'])
     t0s_list = list(periods['t0'])
+    
     #periods_list.append(0.9752)
     idx=0
     for period in periods_list:
@@ -75,6 +76,7 @@ def make_total_plot(data_split, nights, best_periods, initial_period, avg_first_
             ax.plot(dr.iloc[:,tcol], dr.iloc[:,5], linewidth=4.0, label=str(round(periods_list[2],5)), zorder=3)
             ax.plot(dr.iloc[:,tcol], dr.iloc[:,6], linewidth=4.0, label=str(round(periods_list[3],5)), zorder=2)
             ax.plot(dr.iloc[:,tcol], dr.iloc[:,7], linewidth=4.0, label=str(round(periods_list[4],5)), zorder=1)
+
             #ax.plot(dr.iloc[:,tcol], dr.iloc[:,8], linewidth=4.0, label=str(round(periods_list[5],5)))
             ax.set_title('Night ' +str(night))
             #ax.set_ylabel('Magnitude')

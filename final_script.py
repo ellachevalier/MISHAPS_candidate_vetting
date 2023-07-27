@@ -138,7 +138,8 @@ results_batman, results_mcmc, results_mcmc_per, t0_mcmc, t0_err_mcmc, avg_first_
 #find best period estimate
 #data_period_fit = get_split_data(filename_r, filename_z, all_nights)
 if period_fit_parameters is None:
-    period_fit_parameters_final=avg_first_and_last
+    #period_fit_parameters_final=avg_first_and_last
+    period_fit_parameters_final=results_mcmc
 else:
     period_fit_parameters_final={}
     period_fit_parameters_final['rp_r']=period_fit_parameters[0]
@@ -148,7 +149,7 @@ else:
     period_fit_parameters_final['C_r']=period_fit_parameters[4]
     period_fit_parameters_final['C_z']=period_fit_parameters[5]
     
-initial_best_periods, best_periods, final_periods=find_period(transit_data, data_new, period_fit_parameters_final, t0_mcmc, t0_err_mcmc, transit_nights, all_nights, period, [rldc_r, rldc_z], cutoff=cutoff, final_cutoff=final_cutoff)
+initial_best_periods, best_periods, final_periods=find_period(transit_data, data_new, period_fit_parameters_final, t0_mcmc, t0_err_mcmc, all_nights, period, [rldc_r, rldc_z], cutoff=cutoff, final_cutoff=final_cutoff)
 make_chi2_csv(initial_best_periods, best_periods, field, chip, star_id)
 
 if add_period is not None:
@@ -167,7 +168,8 @@ if ignore_nontransit==True:
     final_data=data_new_transit
 else:
     final_data=data_new
-final_periods=final_periods[:1]
+
+
 for best_period in final_periods:
     results_batman_even, results_batman_odd, results_mcmc_even, results_mcmc_odd, results_mcmc_per_even, results_mcmc_per_odd, even_guesses, odd_guesses, mcmc_chains_even, mcmc_chains_odd = compare_odd_and_even(final_data, t0_mcmc, p0_guess, best_period, ecc, w, rldc_r, rldc_z, all_nights, show_plot=True, nwalkers=nwalkers, nsteps=nsteps, even_guesses=even_guesses, odd_guesses=odd_guesses, mcmc_sigmas=mcmc_sigmas)
     
@@ -198,15 +200,16 @@ for best_period in final_periods:
         p0_sec=[fp_guess[0], fp_guess[1], C_guess_sec[0], C_guess_sec[1]]
     #p0_sec=[0.001, 0.001, 16.94, 16.94]
     rldc=[rldc_r, rldc_z]
-    param_sec, param_sec_cov = fit_secondary_eclipse(data_new, results_mcmc_per_all, t0_mcmc, p0_sec, period, rldc)
+    param_sec, param_sec_cov = fit_secondary_eclipse(data_new, results_mcmc_per_all, t0_mcmc, p0_sec, best_period, rldc)
 
-make_total_plot(data_new, all_nights, best_periods, period, avg_first_and_last, t0_mcmc, rldc_r, field, chip, star_id)
+#make_total_plot(data_new, all_nights, best_periods, period, avg_first_and_last, t0_mcmc, rldc_r, field, chip, star_id)
+make_total_plot(data_new, all_nights, best_periods, period, results_mcmc, t0_mcmc, rldc_r, field, chip, star_id)
 make_json_file(chains, final_periods, field, chip, star_id)
 make_final_pdf(contents, field, chip, star_id, p0_guess, even_guesses, odd_guesses, all_guesses, final_periods, densities_r, densities_z, best_periods, transit_nights, remove_variability=remove_variability_test)
 
 
 # %%
-#Can copy and paste into command line to run function
+# Can copy and paste into command line to run function
 #python final_script.py 'F1' 'N2' '01020506' 0.9752 --exclude 2 36 48 738 770 --include_transit 33 35 --Teff 4503 --logg 4.739 --add_period 0.9751834577 --initial_guesses 0.12 0.12 9.0 89.0 18.444946 18.0233109
 #python final_script.py 'F1' 'N2' '01031115' 1.9413 --Teff 5540 --logg 4.499 --exclude 2 36 48 738 770
 #python final_script.py 'F1' 'N19' '01045451' 0.4913 --exclude 2 36 48 738 770 --exclude_transit 740 --include_transit 33 --Teff 5607 --logg 4.481 --nsteps 20000 --remove_variability True --initial_guesses 0.14581235179821908 0.14581235179821908 3.5063794852166175 89.0 17.99 17.99
@@ -218,3 +221,5 @@ make_final_pdf(contents, field, chip, star_id, p0_guess, even_guesses, odd_guess
 #python final_script.py 'F1' 'N13' '01041179' 1.3513 --exclude 2 36 48 738 770 --include_transit 0 --Teff 5508 --logg 4.411 --remove_variability True
 
 #python final_script.py 'F1' 'N18' '01061878' 2.8073 --exclude 2 36 48 738 770 --include_transit 742 --Teff 4196 --logg 4.719 --remove_variability True --period_fit_parameters 0.1 0.1 8.8 90.7 18.25267 18.25121
+
+# %%

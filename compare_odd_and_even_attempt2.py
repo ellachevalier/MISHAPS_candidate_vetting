@@ -13,6 +13,7 @@ import pandas as pd
 import emcee
 import corner
 from PyAstronomy.pyasl import foldAt
+import os
 
 from other_funcs import weighted_avg_and_std, difference, folded_lightcurve, odd_even_data
 #from run_batman_inc_combined import run_batman
@@ -26,7 +27,14 @@ def odd_even_data_new(data, t0_all, period, all_nights):
     div=[round(t/period) for t in t0_new]
     #print(t0_all)
     #print(div)
-    
+    evens=[]
+    odds=[]
+    for num in div:
+        if num%2==0:
+            evens.append(num)
+        else:
+            odds.append(num)
+            
     
     time_transits_r = list(data['time_r'])
     time_transits_z = list(data['time_z'])
@@ -120,6 +128,13 @@ def odd_even_data_new(data, t0_all, period, all_nights):
             #data_odd_z=data_odd_z.append(data_all_z.iloc[idx])
             data_odd_z.loc[idx_odd_z] = data_all_z.iloc[idx]
             idx_odd_z+=1
+    if len(evens)==0:
+        data_even_r=[]
+        data_even_z=[]
+    if len(odds)==0:
+        data_odd_r=[]
+        data_odd_z=[]
+    
     return data_even_r, data_even_z, data_odd_r, data_odd_z
 #     for n, night in enumerate(nights):
 #         #dr = lcr_cut[(lcr_cut.iloc[:,tcol]>night) & (lcr_cut.iloc[:,tcol]<night+1.0)]
@@ -179,112 +194,129 @@ def compare_odd_and_even(data_new, t0s, p0_guess, best_period, ecc, w, rldc_r, r
 
     np.random.seed(42) # set seed so results consistently converge
     labels = ["t0", "rp_r", "rp_z", "a", "inc", "C_r", "C_z"]
+    try:
+        if len(data_even_r)!=0:
+            #param_even, cov_err_even, err_tot_adj_even, results_batman_even = run_batman(p0_guess, best_period, ecc, w, rldc_r, rldc_z, np.array(data_even_r['time_r']), np.array(data_even_z['time_z']), np.array(data_even_r['mag_r']), np.array(data_even_z['mag_z']), np.array(data_even_r['err_r']), np.array(data_even_z['err_z']), title='Transit Model for Even Data', folded=True, t0_1=t0_1)
 
-    if len(data_even_r)!=0:
-        #param_even, cov_err_even, err_tot_adj_even, results_batman_even = run_batman(p0_guess, best_period, ecc, w, rldc_r, rldc_z, np.array(data_even_r['time_r']), np.array(data_even_z['time_z']), np.array(data_even_r['mag_r']), np.array(data_even_z['mag_z']), np.array(data_even_r['err_r']), np.array(data_even_z['err_z']), title='Transit Model for Even Data', folded=True, t0_1=t0_1)
-        
-        time_r_even = np.array(data_even_r['time_r']) - t0_1 + 0.25*best_period
-        time_z_even = np.array(data_even_z['time_z']) - t0_1 + 0.25*best_period
-        phases_r= foldAt(time_r_even, best_period, 0.0)
-        phases_z= foldAt(time_z_even, best_period, 0.0)
-        
-        sortIndi = np.argsort(phases_r)
-        phases_r = phases_r[sortIndi]
-        mag_r = np.array(data_even_r['mag_r'])[sortIndi]
-        err_r = np.array(data_even_r['err_r'])[sortIndi]
-        time_r = np.array(data_even_r['time_r'])[sortIndi]
+            time_r_even = np.array(data_even_r['time_r']) - t0_1 + 0.25*best_period
+            time_z_even = np.array(data_even_z['time_z']) - t0_1 + 0.25*best_period
+            phases_r= foldAt(time_r_even, best_period, 0.0)
+            phases_z= foldAt(time_z_even, best_period, 0.0)
 
-        sortIndi = np.argsort(phases_z)
-        phases_z = phases_z[sortIndi]
-        mag_z = np.array(data_even_z['mag_z'])[sortIndi]
-        err_z = np.array(data_even_z['err_z'])[sortIndi]
-        time_z = np.array(data_even_z['time_z'])[sortIndi]
+            sortIndi = np.argsort(phases_r)
+            phases_r = phases_r[sortIndi]
+            mag_r = np.array(data_even_r['mag_r'])[sortIndi]
+            err_r = np.array(data_even_r['err_r'])[sortIndi]
+            time_r = np.array(data_even_r['time_r'])[sortIndi]
 
-        data_even_r['phase_r']=phases_r
-        data_even_r['time_r']=time_r
-        data_even_r['mag_r']=mag_r
-        data_even_r['err_r']=err_r
-        data_even_z['phase_z']=phases_z
-        data_even_z['time_z']=time_z
-        data_even_z['mag_z']=mag_z
-        data_even_z['err_z']=err_z
-    
-        data_even_r_cut=data_even_r[(data_even_r['phase_r']>0.05) & (data_even_r['phase_r']<0.45)]
-        data_even_z_cut=data_even_z[(data_even_z['phase_z']>0.05) & (data_even_z['phase_z']<0.45)]
-        
-        param_even, cov_err_even, err_tot_adj_even, results_batman_even = run_batman(p0_guess, best_period, ecc, w, rldc_r, rldc_z, data_even_r_cut, data_even_z_cut, data_even_r, data_even_z, title='Transit Model for Even Data', t0_1=t0_1)
+            sortIndi = np.argsort(phases_z)
+            phases_z = phases_z[sortIndi]
+            mag_z = np.array(data_even_z['mag_z'])[sortIndi]
+            err_z = np.array(data_even_z['err_z'])[sortIndi]
+            time_z = np.array(data_even_z['time_z'])[sortIndi]
 
-        lower_bounds = [param_even[0]-0.1, 0.0, 0.0, 0.0, 50.0, 0., 0.]
-        upper_bounds = [param_even[0]+0.1, 10.0, 10.0, 40.0, 130.0, 40., 40.]
+            data_even_r['phase_r']=phases_r
+            data_even_r['time_r']=time_r
+            data_even_r['mag_r']=mag_r
+            data_even_r['err_r']=err_r
+            data_even_z['phase_z']=phases_z
+            data_even_z['time_z']=time_z
+            data_even_z['mag_z']=mag_z
+            data_even_z['err_z']=err_z
 
-        time_tot = np.append(np.array(data_even_r_cut['time_r']), np.array(data_even_z_cut['time_z'])+100000)
-        mag_tot = np.append(np.array(data_even_r_cut['mag_r']), np.array(data_even_z_cut['mag_z']))
-        err_tot = np.append(np.array(data_even_r_cut['err_r']), np.array(data_even_z_cut['err_z']))
-        
-        if even_guesses is None:
-            even_guesses_new = param_even
+            data_even_r_cut=data_even_r[(data_even_r['phase_r']>0.05) & (data_even_r['phase_r']<0.45)]
+            data_even_z_cut=data_even_z[(data_even_z['phase_z']>0.05) & (data_even_z['phase_z']<0.45)]
+
+            param_even, cov_err_even, err_tot_adj_even, results_batman_even = run_batman(p0_guess, best_period, ecc, w, rldc_r, rldc_z, data_even_r_cut, data_even_z_cut, data_even_r, data_even_z, title='Transit Model for Even Data', t0_1=t0_1)
+
+            lower_bounds = [param_even[0]-0.1, 0.0, 0.0, 0.0, 50.0, 0., 0.]
+            upper_bounds = [param_even[0]+0.1, 10.0, 10.0, 40.0, 130.0, 40., 40.]
+
+            time_tot = np.append(np.array(data_even_r_cut['time_r']), np.array(data_even_z_cut['time_z'])+100000)
+            mag_tot = np.append(np.array(data_even_r_cut['mag_r']), np.array(data_even_z_cut['mag_z']))
+            err_tot = np.append(np.array(data_even_r_cut['err_r']), np.array(data_even_z_cut['err_z']))
+
+            if even_guesses is None:
+                even_guesses_new = param_even
+            else:
+                even_guesses_new = even_guesses
+
+            variances = cov_err_even 
+            sigmas = np.sqrt(variances)
+            results_mcmc_even, results_mcmc_per_even, mcmc_chains_even = mcmc_functions.mcmc_all(ndim, nwalkers, nsteps, nburn, nthin, even_guesses_new, labels, time_tot, mag_tot, err_tot_adj_even, lower_bounds, upper_bounds, rldc_r, rldc_z, best_period, ecc, w, title='Transit Model for Even Data', rp_corner=True, sigmas=mcmc_sigmas)
         else:
-            even_guesses_new = even_guesses
-
-        variances = cov_err_even 
-        sigmas = np.sqrt(variances)
-        results_mcmc_even, results_mcmc_per_even, mcmc_chains_even = mcmc_functions.mcmc_all(ndim, nwalkers, nsteps, nburn, nthin, even_guesses_new, labels, time_tot, mag_tot, err_tot_adj_even, lower_bounds, upper_bounds, rldc_r, rldc_z, best_period, ecc, w, title='Transit Model for Even Data', rp_corner=True, sigmas=mcmc_sigmas)
-    else:
-        print('No even transits.')
+            print('No even transits.')
+            no_even=True
+    except:
+        print('Even fit failed.')
         no_even=True
+        fig_list=os.listdir('figs')
+        #print(fig_list)
+        even_pic_list = [item for item in fig_list if 'Even' in item and 'png' in item]
+        for item in even_pic_list:
+            os.remove(os.path.join('figs', item))
         
-    if len(data_odd_r)!=0:
-        #param_odd, cov_err_odd, err_tot_adj_odd, results_batman_odd = run_batman(p0_guess, best_period, ecc, w, rldc_r, rldc_z, np.array(data_odd_r['time_r']), np.array(data_odd_z['time_z']), np.array(data_odd_r['mag_r']), np.array(data_odd_z['mag_z']), np.array(data_odd_r['err_r']), np.array(data_odd_z['err_z']), title='Transit Model for Odd Data' , folded=True, t0_1=t0_1)
-        
-        time_r_odd = np.array(data_odd_r['time_r']) - t0_1 + 0.25*best_period
-        time_z_odd = np.array(data_odd_z['time_z']) - t0_1 + 0.25*best_period
-        phases_r= foldAt(time_r_odd, best_period, 0.0)
-        phases_z= foldAt(time_z_odd, best_period, 0.0)
-        
-        sortIndi = np.argsort(phases_r)
-        phases_r = phases_r[sortIndi]
-        mag_r = np.array(data_odd_r['mag_r'])[sortIndi]
-        err_r = np.array(data_odd_r['err_r'])[sortIndi]
-        time_r = np.array(data_odd_r['time_r'])[sortIndi]
+    try:
+        if len(data_odd_r)!=0:
+            #param_odd, cov_err_odd, err_tot_adj_odd, results_batman_odd = run_batman(p0_guess, best_period, ecc, w, rldc_r, rldc_z, np.array(data_odd_r['time_r']), np.array(data_odd_z['time_z']), np.array(data_odd_r['mag_r']), np.array(data_odd_z['mag_z']), np.array(data_odd_r['err_r']), np.array(data_odd_z['err_z']), title='Transit Model for Odd Data' , folded=True, t0_1=t0_1)
 
-        sortIndi = np.argsort(phases_z)
-        phases_z = phases_z[sortIndi]
-        mag_z = np.array(data_odd_z['mag_z'])[sortIndi]
-        err_z = np.array(data_odd_z['err_z'])[sortIndi]
-        time_z = np.array(data_odd_z['time_z'])[sortIndi]
+            time_r_odd = np.array(data_odd_r['time_r']) - t0_1 + 0.25*best_period
+            time_z_odd = np.array(data_odd_z['time_z']) - t0_1 + 0.25*best_period
+            phases_r= foldAt(time_r_odd, best_period, 0.0)
+            phases_z= foldAt(time_z_odd, best_period, 0.0)
 
-        data_odd_r['phase_r']=phases_r
-        data_odd_r['time_r']=time_r
-        data_odd_r['mag_r']=mag_r
-        data_odd_r['err_r']=err_r
-        data_odd_z['phase_z']=phases_z
-        data_odd_z['time_z']=time_z
-        data_odd_z['mag_z']=mag_z
-        data_odd_z['err_z']=err_z
-        
-        data_odd_r_cut=data_odd_r[(data_odd_r['phase_r']>0.05) & (data_odd_r['phase_r']<0.45)]
-        data_odd_z_cut=data_odd_z[(data_odd_z['phase_z']>0.05) & (data_odd_z['phase_z']<0.45)]
-        
-        param_odd, cov_err_odd, err_tot_adj_odd, results_batman_odd = run_batman(p0_guess, best_period, ecc, w, rldc_r, rldc_z, data_odd_r_cut, data_odd_z_cut, data_odd_r, data_odd_z, title='Transit Model for Odd Data' , t0_1=t0_1)
+            sortIndi = np.argsort(phases_r)
+            phases_r = phases_r[sortIndi]
+            mag_r = np.array(data_odd_r['mag_r'])[sortIndi]
+            err_r = np.array(data_odd_r['err_r'])[sortIndi]
+            time_r = np.array(data_odd_r['time_r'])[sortIndi]
 
-        lower_bounds = [param_odd[0]-0.1, 0.0, 0.0, 0.0, 50.0, 0., 0.]
-        upper_bounds = [param_odd[0]+0.1, 10.0, 10.0, 40.0, 130.0, 40., 40.]
-        
-        time_tot = np.append(np.array(data_odd_r_cut['time_r']), np.array(data_odd_z_cut['time_z'])+100000)
-        mag_tot = np.append(np.array(data_odd_r_cut['mag_r']), np.array(data_odd_z_cut['mag_z']))
-        err_tot = np.append(np.array(data_odd_r_cut['err_r']), np.array(data_odd_z_cut['err_z']))
-        
-        if odd_guesses is None:
-            odd_guesses_new = param_odd
+            sortIndi = np.argsort(phases_z)
+            phases_z = phases_z[sortIndi]
+            mag_z = np.array(data_odd_z['mag_z'])[sortIndi]
+            err_z = np.array(data_odd_z['err_z'])[sortIndi]
+            time_z = np.array(data_odd_z['time_z'])[sortIndi]
+
+            data_odd_r['phase_r']=phases_r
+            data_odd_r['time_r']=time_r
+            data_odd_r['mag_r']=mag_r
+            data_odd_r['err_r']=err_r
+            data_odd_z['phase_z']=phases_z
+            data_odd_z['time_z']=time_z
+            data_odd_z['mag_z']=mag_z
+            data_odd_z['err_z']=err_z
+
+            data_odd_r_cut=data_odd_r[(data_odd_r['phase_r']>0.05) & (data_odd_r['phase_r']<0.45)]
+            data_odd_z_cut=data_odd_z[(data_odd_z['phase_z']>0.05) & (data_odd_z['phase_z']<0.45)]
+
+            param_odd, cov_err_odd, err_tot_adj_odd, results_batman_odd = run_batman(p0_guess, best_period, ecc, w, rldc_r, rldc_z, data_odd_r_cut, data_odd_z_cut, data_odd_r, data_odd_z, title='Transit Model for Odd Data' , t0_1=t0_1)
+
+            lower_bounds = [param_odd[0]-0.1, 0.0, 0.0, 0.0, 50.0, 0., 0.]
+            upper_bounds = [param_odd[0]+0.1, 10.0, 10.0, 40.0, 130.0, 40., 40.]
+
+            time_tot = np.append(np.array(data_odd_r_cut['time_r']), np.array(data_odd_z_cut['time_z'])+100000)
+            mag_tot = np.append(np.array(data_odd_r_cut['mag_r']), np.array(data_odd_z_cut['mag_z']))
+            err_tot = np.append(np.array(data_odd_r_cut['err_r']), np.array(data_odd_z_cut['err_z']))
+
+            if odd_guesses is None:
+                odd_guesses_new = param_odd
+            else:
+                odd_guesses_new = odd_guesses
+
+            variances = cov_err_odd 
+            sigmas = np.sqrt(variances)
+            results_mcmc_odd, results_mcmc_per_odd, mcmc_chains_odd = mcmc_functions.mcmc_all(ndim, nwalkers, nsteps, nburn, nthin, odd_guesses_new, labels, time_tot, mag_tot, err_tot_adj_odd, lower_bounds, upper_bounds, rldc_r, rldc_z, best_period, ecc, w, title='Transit model for Odd Data', rp_corner=True, sigmas=mcmc_sigmas)
         else:
-            odd_guesses_new = odd_guesses
-            
-        variances = cov_err_odd 
-        sigmas = np.sqrt(variances)
-        results_mcmc_odd, results_mcmc_per_odd, mcmc_chains_odd = mcmc_functions.mcmc_all(ndim, nwalkers, nsteps, nburn, nthin, odd_guesses_new, labels, time_tot, mag_tot, err_tot_adj_odd, lower_bounds, upper_bounds, rldc_r, rldc_z, best_period, ecc, w, title='Transit model for Odd Data', rp_corner=True, sigmas=mcmc_sigmas)
-    else:
-        print('No odd transits.')
+            print('No odd transits.')
+            no_odd=True
+    except:
+        print('Odd fit failed.')
         no_odd=True
+        fig_list=os.listdir('figs')
+        #print(fig_list)
+        odd_pic_list = [item for item in fig_list if 'Odd' in item and 'png' in item]
+        for item in odd_pic_list:
+            os.remove(os.path.join('figs', item))
         
     if no_odd==True and no_even==False:
         return results_batman_even, None, results_mcmc_even, None, results_mcmc_per_even, None, even_guesses_new, None, mcmc_chains_even, None

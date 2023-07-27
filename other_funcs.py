@@ -124,14 +124,17 @@ def make_final_pdf(contents, field, chip, star_id, p0_guess, even_guesses, odd_g
     period_pdfs = ['log_x2s_vs_log_periods_with_final_periods.pdf', 'deltax2_vs_period.pdf', 'total_plot_'+str(star_id)+'.pdf']
     for file in period_pdfs:
         pdfs.append(os.path.join('period_fit_results', file))
-    pdfs.append(os.path.join('figs','secondary_eclipse_fit.pdf'))
+    
     fig_list=os.listdir('figs')
     sec_pic_list = [item for item in fig_list if 'secondary' in item]
     for file in sec_pic_list:
         pdfs.append(os.path.join('figs', file))
     #pdfs.append(os.path.join('figs', 'secondary_eclipse_fit_all_parameters.pdf'))
     #pdfs.append('total_plot_'+str(star_id)+'.pdf')
-    
+    secondary_pdfs=[]
+    for best_period in final_periods:
+        secondary_pdfs.append(os.path.join('results',"secondary_results"+"_period_"+str(round(best_period,4))+".pdf"))
+    pdfs.extend(secondary_pdfs)
     merger = PdfMerger()
     for pdf in pdfs:
         merger.append(os.path.join(pdf))
